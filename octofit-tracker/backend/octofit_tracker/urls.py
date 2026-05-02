@@ -30,14 +30,26 @@ router.register(r'activities', views.ActivityViewSet)
 router.register(r'workouts', views.WorkoutViewSet)
 router.register(r'leaderboard', views.LeaderboardViewSet)
 
+
+import os
+
+# Helper to build full API URLs using $CODESPACE_NAME if available
+def build_api_url(request, name):
+    codespace_name = os.environ.get('CODESPACE_NAME')
+    if codespace_name:
+        base_url = f"https://{codespace_name}-8000.app.github.dev"
+    else:
+        base_url = request.build_absolute_uri('/')[:-1]
+    return base_url + reverse(name, request=request)
+
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
-        'users': reverse('user-list', request=request, format=format),
-        'teams': reverse('team-list', request=request, format=format),
-        'activities': reverse('activity-list', request=request, format=format),
-        'workouts': reverse('workout-list', request=request, format=format),
-        'leaderboard': reverse('leaderboard-list', request=request, format=format),
+        'users': build_api_url(request, 'user-list'),
+        'teams': build_api_url(request, 'team-list'),
+        'activities': build_api_url(request, 'activity-list'),
+        'workouts': build_api_url(request, 'workout-list'),
+        'leaderboard': build_api_url(request, 'leaderboard-list'),
     })
 
 urlpatterns = [
